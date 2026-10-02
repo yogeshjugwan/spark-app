@@ -1,0 +1,22 @@
+# Render blueprint: Spark web app as a static site.
+# Render → New → Blueprint → pick this repo. Set EXPO_PUBLIC_API_URL to the public API address.
+services:
+  - type: web
+    name: spark-web
+    runtime: static
+    buildCommand: npm ci && npx expo export -p web --output-dir dist
+    staticPublishPath: dist
+    envVars:
+      - key: EXPO_PUBLIC_API_URL
+        sync: false # asked for when the blueprint is created, e.g. https://spark-api.onrender.com
+      - key: NODE_VERSION
+        value: "22"
+    # Client-side routes (/chat/3, /premium…) fall back to the app shell.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /_expo/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
